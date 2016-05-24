@@ -60,9 +60,9 @@ void setup()
   
   // Set the message on the screen
   lcd.setCursor(0, 0);
-  lcd.print("IEEE Workshop.");
+  lcd.print("Arduino Workshop.");
   lcd.setCursor(0, 1);
-  lcd.print("I want cookies!");
+  lcd.print("Skullspace!");
 }
 
 /***
