@@ -40,17 +40,26 @@
 #define INVALID_KEY     -1
 
 // Each button has a different resistance value
-#define KEY_RIGHT_ADC   50
-#define KEY_UP_ADC      200
-#define KEY_DOWN_ADC    400
-#define KEY_LEFT_ADC    600
-#define KEY_SELECT_ADC  800
+#define KEY_RIGHT       50
+#define KEY_UP          200
+#define KEY_DOWN        400
+#define KEY_LEFT        600
+#define KEY_SELECT      800
 
-#define KEY_RIGHT       0
-#define KEY_UP          1
-#define KEY_DOWN        2
-#define KEY_LEFT        3
+// Define id for pacman character
+#define PACMAN_OPEN     0x1
 
+// Pacman with the mouth opened
+byte pacmanOpenDef[8] = {
+  0b00000,
+  0b01110,
+  0b10100,
+  0b11000,
+  0b11100,
+  0b01110,
+  0b00000,
+  0b00000
+};
 
 // Create instance of LiquidCrystal object
 LiquidCrystal lcd(
@@ -65,14 +74,16 @@ LiquidCrystal lcd(
 
 // Analog value corresponding to each key pressed
 int keyMapping[NUM_KEYS] = {
-  KEY_RIGHT_ADC, 
-  KEY_UP_ADC, 
-  KEY_DOWN_ADC, 
-  KEY_LEFT_ADC, 
-  KEY_SELECT_ADC 
+  KEY_RIGHT, 
+  KEY_UP, 
+  KEY_DOWN, 
+  KEY_LEFT, 
+  KEY_SELECT 
   };
   
 int key = INVALID_KEY;
+int x   = 0;
+int y   = 0;
 
 /***
  * setup()
@@ -86,7 +97,17 @@ void setup()
   // Set the dimensions of the LCD screen.
   lcd.begin(NUM_COLS, NUM_ROWS);
   
-  // Initialize pacman
+  // Define pacman character
+  lcd.createChar(PACMAN_OPEN,  pacmanOpenDef);
+  
+  x = 0;
+  y = 0;
+  lcd.setCursor(x, y);
+  
+  // Write pacman to the home position
+  lcd.write(PACMAN_OPEN);
+  
+  Serial.begin(9600);
 }
 
 /***
@@ -97,13 +118,36 @@ void loop()
 {
   // Read key
   key = readKey();
-
+  
+  //Serial.println("COORDINATE: " + x + " " + y);
   
   // If a key is pressed, print the message
   if(INVALID_KEY != key)
   {
-    // Move pacman on the screen
-
+    lcd.setCursor(x, y);
+    lcd.write(' ');
+    
+    if(KEY_RIGHT == key && x < NUM_COLS-1)
+    {
+      x++;
+    }
+    else if(KEY_LEFT == key && x > 0)
+    {
+      x--; 
+    }
+    else if(KEY_DOWN == key && y < NUM_ROWS-1)
+    {
+      y++; 
+    }
+    else if(KEY_UP == key && y > 0)
+    {
+      y--; 
+    }
+    
+    lcd.setCursor(0,0);
+    lcd.print(x);
+    lcd.setCursor(0,1);
+    lcd.print(y);
   }
   
   // Delay before printing next message
@@ -124,7 +168,7 @@ int readKey(void)
   {
     if(key < keyMapping[index])
     {
-       return index; 
+       return keyMapping[index]; 
     }
   }
    
